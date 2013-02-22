@@ -56,6 +56,7 @@ public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering
 					System.exit(0);
 				} catch (ServerException e) {
 					System.out.println("Registry could not find your classes.");
+					e.printStackTrace();
 					System.exit(0);
 				}
 				break;
