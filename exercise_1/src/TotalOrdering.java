@@ -19,17 +19,42 @@ public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering
 	
 	public static void main(String[] args) {
 		try {
-			int id = Integer.parseInt(args[0]);
-			int n  = Integer.parseInt(args[1]);
+			int n, id = 0;
+			try {
+				n  = Integer.parseInt(args[0]);
+			} catch (Exception e) {
+				System.out.println("Usage: program <n>");
+				System.exit(0);
+				return;
+			}
 			
-			System.out.println("ID: " + id + ", N: " + n);
-
 //			if (System.getSecurityManager() == null) {
 //				System.setSecurityManager(new RMISecurityManager());
 //			}
 			
 			System.out.println("Bind...");
-			Naming.bind(uri_base + "TotalOrdering/" + id, new TotalOrdering());
+			
+			String uri = "error";
+			while (true) {
+				try {
+					uri = uri_base + "TotalOrdering/" + id;
+					Naming.bind(uri, new TotalOrdering());
+				} catch (AlreadyBoundException e) {
+					id++;
+					continue;
+				} catch (ConnectException e) {
+					System.out.println("Failed to connect to registry.");
+					System.exit(0);
+				} catch (ServerException e) {
+					System.out.println("Registry could not find your classes.");
+					System.exit(0);
+				}
+				break;
+			}
+			
+			Runtime.getRuntime().addShutdownHook(new Unbinder(uri));
+			
+			System.out.println("Bound on: " + uri);
 			
 			System.out.println("Connecting to friends...");
 			while (friends.size() != n) {
@@ -42,13 +67,46 @@ public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering
 			}
 			
 			System.out.println("Broadcast...");
-			for (ITotalOrdering remote : friends)
-				remote.test("from " + id + ": Hi!");
+			for (int i = 0; i < friends.size(); i++) {
+				ITotalOrdering remote = friends.get(i);
+				try {
+					remote.test("from " + id + ": Hi!");
+				} catch (ConnectException e) {
+					try {
+						remote = (ITotalOrdering) Naming.lookup(uri_base + "TotalOrdering/" + i);
+						friends.set(i, remote);
+						remote.test("from " + id + ": Hi!");
+					} catch (NotBoundException e2) {
+						System.out.println("Could not connect to remote instance.");
+					} catch (ConnectException e2) {
+						System.out.println("Could not connect to remote instance.");
+					}
+				}
+			}
 		
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(0);
 		}
 		
 		System.out.println("END");			
 	}
+}
+
+class Unbinder extends Thread {
+	public String uri;
+	
+	public Unbinder(String uri) {
+		this.uri = uri;
+	}
+	
+	public void run() {
+		System.out.println("Unbinding uri");
+		try {
+        	Naming.unbind(uri);
+        } catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+    }
 }
