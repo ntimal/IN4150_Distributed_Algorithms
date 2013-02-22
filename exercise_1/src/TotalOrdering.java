@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering {
 	private static final long serialVersionUID = -5840789656649365132L;
-	private static final int port = 9090;
-	private static final String uri_base = "rmi://localhost:" + port + "/";
 
 	private static ArrayList<ITotalOrdering> friends = new ArrayList<ITotalOrdering>();
 	
@@ -19,14 +17,25 @@ public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering
 	
 	public static void main(String[] args) {
 		try {
+			String host = "localhost";
+			int port = 9090;
 			int n, id = 0;
 			try {
 				n  = Integer.parseInt(args[0]);
+				
+				if (args.length > 1)
+					host = args[1];
+				
+				if (args.length > 2)
+					port = Integer.parseInt(args[2]);
+				
 			} catch (Exception e) {
-				System.out.println("Usage: program <n>");
+				System.out.println("Usage: program <n> [host=localhost] [port=9090]");
 				System.exit(0);
 				return;
 			}
+			
+			String uri_base = "rmi://" + host + ":" + port + "/TotalOrdering/";
 			
 //			if (System.getSecurityManager() == null) {
 //				System.setSecurityManager(new RMISecurityManager());
@@ -37,7 +46,7 @@ public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering
 			String uri = "error";
 			while (true) {
 				try {
-					uri = uri_base + "TotalOrdering/" + id;
+					uri = uri_base + id;
 					Naming.bind(uri, new TotalOrdering());
 				} catch (AlreadyBoundException e) {
 					id++;
@@ -59,7 +68,7 @@ public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering
 			System.out.println("Connecting to friends...");
 			while (friends.size() != n) {
 				try {
-					ITotalOrdering remote = (ITotalOrdering) Naming.lookup(uri_base + "TotalOrdering/" + friends.size());
+					ITotalOrdering remote = (ITotalOrdering) Naming.lookup(uri_base + friends.size());
 					friends.add(remote);
 				} catch (java.rmi.NotBoundException e) {
 					Thread.sleep(500);
@@ -73,7 +82,7 @@ public class TotalOrdering extends UnicastRemoteObject implements ITotalOrdering
 					remote.test("from " + id + ": Hi!");
 				} catch (ConnectException e) {
 					try {
-						remote = (ITotalOrdering) Naming.lookup(uri_base + "TotalOrdering/" + i);
+						remote = (ITotalOrdering) Naming.lookup(uri_base + i);
 						friends.set(i, remote);
 						remote.test("from " + id + ": Hi!");
 					} catch (NotBoundException e2) {
