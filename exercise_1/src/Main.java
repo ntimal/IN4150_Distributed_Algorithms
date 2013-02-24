@@ -1,10 +1,6 @@
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.rmi.ConnectException;
-import java.rmi.Naming;
-import java.rmi.RemoteException;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.rmi.*;
 import java.util.ArrayList;
 
 public class Main {
@@ -12,6 +8,11 @@ public class Main {
 	private static ArrayList<String> slots = new ArrayList<String>();
 	private static ArrayList<ITotalOrdering> friends = new ArrayList<ITotalOrdering>();
 	
+	/**
+	 * Read the configuration file.
+	 * 
+	 * After this function has been executed the slots property has been filled.
+	 */
 	private static void readConfig() {
 		try {
 			FileInputStream fstream = new FileInputStream("../etc/hosts.conf");
@@ -27,14 +28,21 @@ public class Main {
 			
 			in.close();
 			fstream.close();
-		} catch (Exception e) {
+		} catch (IOException e) {
 			System.out.println("Error reading config file");
 			e.printStackTrace();
 			System.exit(1);
 		}
 	}
 	
-	private static void bind(TotalOrdering instance) throws RemoteException {
+	/**
+	 * Bind instance to a slot.
+	 * 
+	 * After this function has been executed an id has been assigned.
+	 * 
+	 * @param instance The instance to be bound.
+	 */
+	private static void bind(Remote instance) {
 		String uri;
 		
 		for (id = 0; id < slots.size(); id++) {
@@ -43,7 +51,7 @@ public class Main {
 			
 			try {
 				Naming.bind(uri, instance);
-			} catch (Exception e) {
+			} catch (MalformedURLException | AlreadyBoundException | RemoteException e) {
 				continue;
 			}
 			
@@ -58,7 +66,12 @@ public class Main {
 		System.exit(1);
 	}
 	
-	private static void connect() throws InterruptedException {
+	/**
+	 * Connect to all friends.
+	 * 
+	 * After this function has been executed the friends property has been filled.
+	 */
+	private static void connect() {
 		for (int i = 0; i < slots.size(); i++) {
 			String uri = slots.get(i);
 			while (true) {
@@ -67,31 +80,41 @@ public class Main {
 					friends.add(remote);
 					System.out.println("CONNECTED: " + i + ": " + uri);
 					break;
-				} catch (Exception e) {
-					Thread.sleep(500);
+				} catch (MalformedURLException | NotBoundException | RemoteException e) {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e2) {}
 				}
 			}
 		}
 		System.out.println();
 	}
 	
-	private static void broadcast() throws RemoteException {
+	/**
+	 * Broadcast a massage to all friends.
+	 */
+	private static void broadcast() {
 		for (int i = 0; i < friends.size(); i++) {
 			ITotalOrdering remote = friends.get(i);
 			try {
 				remote.test("from " + id + ": Hi!");
-			} catch (ConnectException e) {
+			} catch (RemoteException e) {
 				try {
 					remote = (ITotalOrdering) Naming.lookup(slots.get(i));
 					friends.set(i, remote);
 					remote.test("from " + id + ": Hi!");
-				} catch (Exception e2) {
+				} catch (MalformedURLException | NotBoundException | RemoteException e2) {
 					System.out.println("Could not connect to remote instance.");
 				}
 			}
 		}
 	}
 	
+	/**
+	 * The entry point for the program.
+	 * 
+	 * @param args The command line arguments passed to the program.
+	 */
 	public static void main(String[] args) {
 		try {
 			readConfig();
@@ -105,7 +128,7 @@ public class Main {
 			broadcast();
 			
 			Thread.sleep(1000);
-		} catch (Exception e) {
+		} catch (InterruptedException | RemoteException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -125,7 +148,7 @@ class Unbinder extends Thread {
 		System.out.println("Unbinding uri");
 		try {
         	Naming.unbind(uri);
-        } catch (Exception e) {
+        } catch (RemoteException | MalformedURLException | NotBoundException e) {
 			Runtime.getRuntime().halt(1);
 		}
     }
