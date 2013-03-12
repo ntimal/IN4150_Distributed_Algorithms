@@ -1,19 +1,16 @@
 import java.io.*;
-import java.net.MalformedURLException;
 import java.rmi.*;
 import java.util.ArrayList;
 
-public class Main {
-	private static int id = -1;
-	private static ArrayList<String> slots = new ArrayList<String>();
-	private static ArrayList<ITotalOrdering> friends = new ArrayList<ITotalOrdering>();
-	
+public class Main {	
 	/**
 	 * Read the configuration file.
 	 * 
-	 * After this function has been executed the slots property has been filled.
+	 * @returns a list of the available slots.
 	 */
-	private static void readConfig() {
+	private static ArrayList<String> readConfig() {
+		ArrayList<String> slots = new ArrayList<String>();
+		
 		try {
 			FileInputStream fstream = new FileInputStream("../etc/hosts.conf");
 			DataInputStream in = new DataInputStream(fstream);
@@ -33,81 +30,8 @@ public class Main {
 			e.printStackTrace();
 			System.exit(1);
 		}
-	}
-	
-	/**
-	 * Bind instance to a slot.
-	 * 
-	 * After this function has been executed an id has been assigned.
-	 * 
-	 * @param instance The instance to be bound.
-	 */
-	private static void bind(Remote instance) {
-		String uri;
 		
-		for (id = 0; id < slots.size(); id++) {
-			
-			uri = slots.get(id);
-			
-			try {
-				Naming.bind(uri, instance);
-			} catch (MalformedURLException | AlreadyBoundException | RemoteException e) {
-				continue;
-			}
-			
-			Runtime.getRuntime().addShutdownHook(new Unbinder(uri));
-			
-			System.out.println("BIND: " + id + ": " + uri);
-			System.out.println();
-			return;
-		}
-		
-		System.out.println("Faild to bind!");
-		System.exit(1);
-	}
-	
-	/**
-	 * Connect to all friends.
-	 * 
-	 * After this function has been executed the friends property has been filled.
-	 */
-	private static void connect() {
-		for (int i = 0; i < slots.size(); i++) {
-			String uri = slots.get(i);
-			while (true) {
-				try {
-					ITotalOrdering remote = (ITotalOrdering) Naming.lookup(uri);
-					friends.add(remote);
-					System.out.println("CONNECTED: " + i + ": " + uri);
-					break;
-				} catch (MalformedURLException | NotBoundException | RemoteException e) {
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e2) {}
-				}
-			}
-		}
-		System.out.println();
-	}
-	
-	/**
-	 * Broadcast a massage to all friends.
-	 */
-	private static void broadcast() {
-		for (int i = 0; i < friends.size(); i++) {
-			ITotalOrdering remote = friends.get(i);
-			try {
-				remote.test("from " + id + ": Hi!");
-			} catch (RemoteException e) {
-				try {
-					remote = (ITotalOrdering) Naming.lookup(slots.get(i));
-					friends.set(i, remote);
-					remote.test("from " + id + ": Hi!");
-				} catch (MalformedURLException | NotBoundException | RemoteException e2) {
-					System.out.println("Could not connect to remote instance.");
-				}
-			}
-		}
+		return slots;
 	}
 	
 	/**
@@ -116,40 +40,17 @@ public class Main {
 	 * @param args The command line arguments passed to the program.
 	 */
 	public static void main(String[] args) {
-		try {
-			readConfig();
-			bind(new TotalOrdering());
-			
-			System.out.println("Connecting to friends...");
-			connect();
-			
-			System.out.println("Broadcast...");
-			Thread.sleep(1000);
-			broadcast();
-			
-			Thread.sleep(1000);
-		} catch (InterruptedException | RemoteException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		System.out.println("END");			
+		for (int i = 0; i < 2; i++)
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						Connector connector = new TotalOrdering();
+						connector.initialize(readConfig());
+						connector.test();
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
 	}
-}
-
-class Unbinder extends Thread {
-	public String uri;
-	
-	public Unbinder(String uri) {
-		this.uri = uri;
-	}
-	
-	public void run() {
-		System.out.println("Unbinding uri");
-		try {
-        	Naming.unbind(uri);
-        } catch (RemoteException | MalformedURLException | NotBoundException e) {
-			Runtime.getRuntime().halt(1);
-		}
-    }
 }
