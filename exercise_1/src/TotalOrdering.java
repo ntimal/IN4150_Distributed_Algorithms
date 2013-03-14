@@ -59,8 +59,8 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		
 		if (m == map.firstEntry().getValue()) {
 			while (!m.fake && m.acks == slots.size()) {
-				print("\33[1;31mDEL\33[0m " + timestamp);
-				map.remove(timestamp);
+				print("\33[1;31mDEL\33[0m " + m.timestamp);
+				map.remove(m.timestamp);
 				
 				Entry<Integer, Message> entry = map.firstEntry();
 				if (entry == null)
