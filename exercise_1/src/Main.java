@@ -1,5 +1,5 @@
 import java.io.*;
-import java.rmi.*;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class Main {	
