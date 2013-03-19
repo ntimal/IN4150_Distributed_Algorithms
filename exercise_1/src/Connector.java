@@ -2,6 +2,7 @@ import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Random;
 
 public abstract class Connector extends UnicastRemoteObject {
 	private static final long serialVersionUID = -6481677105759654371L;
@@ -9,9 +10,18 @@ public abstract class Connector extends UnicastRemoteObject {
 	protected int id = -1;
 	protected ArrayList<String> slots;
 	protected ArrayList<ITotalOrdering> friends;
+	protected Random rng = new Random();
 	
 	protected void print(String message) {
 		System.out.println("" + id + " " + message);
+	}
+	
+	protected void random_delay() {
+		try {
+			Thread.sleep(rng.nextInt(1000));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public Connector() throws RemoteException {

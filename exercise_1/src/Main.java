@@ -44,7 +44,7 @@ public class Main {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						Connector connector = new TotalOrderingTest();
+						Connector connector = new TotalOrdering();
 						connector.initialize(readConfig());
 						connector.test();
 					} catch (RemoteException e) {
