@@ -42,7 +42,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		
 		if (m == map.firstEntry().getValue()) {
 			while (!m.fake && m.acks == slots.size()) {
-				print("DEL " + m.timestamp);
+				deliver(m.timestamp);
 				map.remove(m.timestamp);
 				
 				Entry<Integer, Message> entry = map.firstEntry();
@@ -83,6 +83,10 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		pm.id_from = id_from;
 		pm.subject = this;
 		new Thread(pm).start();
+	}
+	
+	protected void deliver(int timestamp) {
+		print("DEL " + timestamp);
 	}
 	
 	private synchronized void do_post_message(int timestamp) {

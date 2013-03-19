@@ -8,7 +8,7 @@ public class Main {
 	 * 
 	 * @returns a list of the available slots.
 	 */
-	private static ArrayList<String> readConfig() {
+	public static ArrayList<String> readConfig() {
 		ArrayList<String> slots = new ArrayList<String>();
 		
 		try {
@@ -44,7 +44,7 @@ public class Main {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						Connector connector = new TotalOrdering();
+						Connector connector = new TotalOrderingTest();
 						connector.initialize(readConfig());
 						connector.test();
 					} catch (RemoteException e) {
