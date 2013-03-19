@@ -5,23 +5,6 @@ import java.util.TreeMap;
 
 public class TotalOrdering extends Connector implements ITotalOrdering {
 	
-/*	#define C_RESET   "\33[0m"
-	#define C_RED     "\33[1;31m"
-	#define C_GREEN   "\33[1;32m"
-	#define C_YELLOW  "\33[1;33m"
-	#define C_BLUE    "\33[1;34m"
-	#define C_MAGENTA "\33[1;35m"
-	#define C_CYAN    "\33[1;36m"
-	#define C_WHITE   "\33[1;37m"
-
-	#define B_RED     "\33[1;37;41m"
-	#define B_GREEN   "\33[1;37;42m"
-	#define B_YELLOW  "\33[1;37;43m"
-	#define B_BLUE    "\33[1;37;44m"
-	#define B_MAGENTA "\33[1;37;45m"
-	#define B_CYAN    "\33[1;37;46m"
-	#define B_WHITE   "\33[1;37;47m"*/
-
 	private class Message implements Comparable<Message> {
 		
 		public int timestamp;
@@ -59,7 +42,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		
 		if (m == map.firstEntry().getValue()) {
 			while (!m.fake && m.acks == slots.size()) {
-				print("\33[1;31mDEL\33[0m " + m.timestamp);
+				print("DEL " + m.timestamp);
 				map.remove(m.timestamp);
 				
 				Entry<Integer, Message> entry = map.firstEntry();
@@ -104,6 +87,8 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 	
 	private synchronized void do_post_message(int timestamp) {
 		print("POS " + timestamp);
+		
+		clock = Math.max(clock, timestamp / slots.size() + 1);
 		
 		insert_message(timestamp, false);
 		

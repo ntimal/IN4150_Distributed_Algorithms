@@ -40,7 +40,7 @@ public class Main {
 	 * @param args The command line arguments passed to the program.
 	 */
 	public static void main(String[] args) {
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < Integer.parseInt(args[0]); i++)
 			new Thread(new Runnable() {
 				public void run() {
 					try {

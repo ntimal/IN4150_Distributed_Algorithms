@@ -11,7 +11,7 @@ public abstract class Connector extends UnicastRemoteObject {
 	protected ArrayList<ITotalOrdering> friends;
 	
 	protected void print(String message) {
-		System.out.println("" + id + ": " + message);
+		System.out.println("" + id + " " + message);
 	}
 	
 	public Connector() throws RemoteException {
@@ -65,7 +65,7 @@ public abstract class Connector extends UnicastRemoteObject {
 				try {
 					ITotalOrdering remote = (ITotalOrdering) Naming.lookup(uri);
 					friends.add(remote);
-					print("CON " + i + ": " + uri);
+					print("CON " + i + " " + uri);
 					break;
 				} catch (MalformedURLException | NotBoundException | RemoteException e) {
 					try {
