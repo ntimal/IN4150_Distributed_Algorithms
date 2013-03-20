@@ -8,7 +8,8 @@ import common.WorkerThread;
 public class Component extends common.Component<IComponent> implements IComponent {
 	
 	private static final long serialVersionUID = -622675372815599726L;
-	private ArrayList<Integer> state;
+	private ArrayList<Integer> state_received;
+	private ArrayList<Integer> state_sent;
 	private boolean recording = false;
 	private ArrayList<ArrayList<Integer>> message_buffer;
 	private int clock = 0;
@@ -19,9 +20,14 @@ public class Component extends common.Component<IComponent> implements IComponen
 	
 	public void initialize(ArrayList<String> slots, WorkerThread thread) {
 		super.initialize(slots, thread);
-		state = new ArrayList<Integer>();
-		for (int i = 0; i < slots.size() * 2; i++)
-			state.add(-1);
+		
+		state_received = new ArrayList<Integer>();
+		state_sent = new ArrayList<Integer>();
+		
+		for (int i = 0; i < slots.size(); i++) {
+			state_received.add(-1);
+			state_sent.add(-1);
+		}
 	}
 
 	public void post_message(int from_id, int data) {
@@ -63,11 +69,10 @@ public class Component extends common.Component<IComponent> implements IComponen
 	private void do_post_message(int from_id, int data) {
 		random_delay();
 		
-		if (recording) {
+		if (recording)
 			message_buffer.get(from_id).add(data);
-		} else {
-			state.set(from_id * 2, data);
-		}
+		else
+			state_received.set(from_id, data);
 	}
 	
 	private void do_post_marker(int from_id) {
@@ -86,7 +91,7 @@ public class Component extends common.Component<IComponent> implements IComponen
 			for (int i = 0; i < friends.size(); i++) {
 				IComponent friend = friends.get(i);
 				int msg_id = clock++ * slots.size() + id;
-				state.set(i * 2 + 1, msg_id);
+				state_sent.set(i, msg_id);
 				friend.post_message(id, msg_id);
 			}
 			
@@ -100,7 +105,8 @@ public class Component extends common.Component<IComponent> implements IComponen
 	
 	private void record_global_state() {
 		recording = true;
-		print("STATE " + state);
+		print("SENT     " + state_sent);
+		print("RECEIVED " + state_received);
 		
 		message_buffer = new ArrayList<ArrayList<Integer>>();
 		for (IComponent friend : friends) {
