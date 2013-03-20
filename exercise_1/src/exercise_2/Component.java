@@ -3,15 +3,25 @@ package exercise_2;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
+import common.WorkerThread;
+
 public class Component extends common.Component<IComponent> implements IComponent {
 	
 	private static final long serialVersionUID = -622675372815599726L;
-	private int amount = 0;
+	private ArrayList<Integer> state;
 	private boolean recording = false;
 	private ArrayList<ArrayList<Integer>> message_buffer;
+	private int clock = 0;
 	
 	public Component() throws RemoteException {
 		super();
+	}
+	
+	public void initialize(ArrayList<String> slots, WorkerThread thread) {
+		super.initialize(slots, thread);
+		state = new ArrayList<Integer>();
+		for (int i = 0; i < slots.size() * 2; i++)
+			state.add(-1);
 	}
 
 	public void post_message(int from_id, int data) {
@@ -32,6 +42,9 @@ public class Component extends common.Component<IComponent> implements IComponen
 	}
 
 	public void post_marker(int from_id) {
+		// The C++ coder wonders why Java sucks so much!
+		// thread->dispatch(boost::bind(&Component::do_post_marker, this, from_id));
+		
 		class Bind implements Runnable {
 			public int from_id;
 			public Component subject;
@@ -53,7 +66,7 @@ public class Component extends common.Component<IComponent> implements IComponen
 		if (recording) {
 			message_buffer.get(from_id).add(data);
 		} else {
-			amount += data;
+			state.set(from_id * 2, data);
 		}
 	}
 	
@@ -70,20 +83,16 @@ public class Component extends common.Component<IComponent> implements IComponen
 	
 	protected void do_test() {
 		try {
-			for (IComponent friend : friends) {
-				amount -= 10;
-				friend.post_message(id, 3);
-				friend.post_message(id, 7);
+			for (int i = 0; i < friends.size(); i++) {
+				IComponent friend = friends.get(i);
+				int msg_id = clock++ * slots.size() + id;
+				state.set(i * 2 + 1, msg_id);
+				friend.post_message(id, msg_id);
 			}
 			
 			if (id == 0)
 				record_global_state();
 			
-			for (IComponent friend : friends) {
-				amount -= 5;
-				friend.post_message(id, 5);
-				
-			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -91,7 +100,7 @@ public class Component extends common.Component<IComponent> implements IComponen
 	
 	private void record_global_state() {
 		recording = true;
-		print("AMOUNT " + amount);
+		print("STATE " + state);
 		
 		message_buffer = new ArrayList<ArrayList<Integer>>();
 		for (IComponent friend : friends) {
