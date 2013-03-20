@@ -128,7 +128,7 @@ public class TotalOrdering extends Component<ITotalOrdering> implements ITotalOr
 		print("ACK " + timestamp + " FROM " + id_from);
 		
 		insert_message(timestamp, true);
-		print("ACK DONE " + timestamp + " FROM " + id_from);
+		
 	}
 	
 	private void broadcast() {
