@@ -5,10 +5,9 @@ import java.rmi.*;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import common.Connector;
-import common.WorkerThread;
+import common.Component;
 
-public class TotalOrdering extends Connector implements ITotalOrdering {
+public class TotalOrdering extends Component<ITotalOrdering> implements ITotalOrdering {
 
 	private class Message implements Comparable<Message> {
 		
@@ -28,9 +27,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 	private static final long serialVersionUID = -5840789656649365132L;
 	
 	private int clock = 0;
-	
-	private WorkerThread thread = new WorkerThread();
-	
+		
 	private TreeMap<Integer, Message> map = new TreeMap<Integer, Message>();
 	
 	public TotalOrdering() throws RemoteException {
@@ -63,7 +60,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		}
 	}
 	
-	public void post_message(int timestamp) throws RemoteException {
+	public void post_message(int timestamp) {
 		class Bind implements Runnable {
 			public int timestamp;
 			public TotalOrdering subject;
@@ -79,7 +76,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		thread.dispatch(pm);
 	}
 	
-	public void acknowledge(int timestamp, int id_from) throws RemoteException {
+	public void acknowledge(int timestamp, int id_from) {
 		class Bind implements Runnable {
 			public int timestamp, id_from;
 			public TotalOrdering subject;
@@ -100,7 +97,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		print("DEL " + timestamp);
 	}
 	
-	private synchronized void do_post_message(int timestamp) {
+	private void do_post_message(int timestamp) {
 		
 		random_delay();
 		print("POS " + timestamp);
@@ -125,7 +122,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		print("POS DONE " + timestamp);
 	}
 	
-	private synchronized void do_acknowledge(int timestamp, int id_from) {
+	private void do_acknowledge(int timestamp, int id_from) {
 		
 		random_delay();
 		print("ACK " + timestamp + " FROM " + id_from);
@@ -134,7 +131,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		print("ACK DONE " + timestamp + " FROM " + id_from);
 	}
 	
-	private synchronized void broadcast() {
+	private void broadcast() {
 		int timestamp = clock++ * slots.size() + id;
 		print("BRO " + timestamp);
 		
@@ -155,17 +152,7 @@ public class TotalOrdering extends Connector implements ITotalOrdering {
 		}
 	}
 	
-	public void test() {
-		class Bind implements Runnable {
-			public TotalOrdering subject;
-			public void run() {
-				subject.broadcast();
-			}
-		}
-		
-		Bind br = new Bind();
-		br.subject = this;
-		
-		thread.dispatch(br);
+	protected void do_test() {
+		broadcast();
 	}
 }

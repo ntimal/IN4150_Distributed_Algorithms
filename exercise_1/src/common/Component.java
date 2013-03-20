@@ -6,16 +6,17 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Random;
 
-import exercise_1.ITotalOrdering;
+import exercise_1.TotalOrdering;
 
-public abstract class Connector extends UnicastRemoteObject {
+public abstract class Component<RemoteType extends Remote> extends UnicastRemoteObject {
 	private static final long serialVersionUID = -6481677105759654371L;
 	
 	protected int id = -1;
 	protected ArrayList<String> slots;
-	protected ArrayList<ITotalOrdering> friends;
+	protected ArrayList<RemoteType> friends;
 	protected Random rng = new Random();
-	
+	protected WorkerThread thread;
+
 	protected void print(String message) {
 		System.out.println("" + id + " " + message);
 	}
@@ -28,12 +29,13 @@ public abstract class Connector extends UnicastRemoteObject {
 		}
 	}
 	
-	public Connector() throws RemoteException {
+	public Component() throws RemoteException {
 		super();
 	}
 	
-	public synchronized void initialize(ArrayList<String> slots) {
+	public void initialize(ArrayList<String> slots, WorkerThread thread) {
 		this.slots = slots;
+		this.thread = thread;
 		bind();
 		connect();
 	}
@@ -70,15 +72,15 @@ public abstract class Connector extends UnicastRemoteObject {
 	 * 
 	 * After this function has been executed the friends property has been filled.
 	 */
+	@SuppressWarnings("unchecked")
 	private void connect() {
-		friends = new ArrayList<ITotalOrdering>();
+		friends = new ArrayList<RemoteType>();
 		
 		for (int i = 0; i < slots.size(); i++) {
 			String uri = slots.get(i);
 			while (true) {
 				try {
-					ITotalOrdering remote = (ITotalOrdering) Naming.lookup(uri);
-					friends.add(remote);
+					friends.add((RemoteType) Naming.lookup(uri));
 					print("CON " + i + " " + uri);
 					break;
 				} catch (MalformedURLException | NotBoundException | RemoteException e) {
@@ -90,7 +92,21 @@ public abstract class Connector extends UnicastRemoteObject {
 		}
 	}
 
-	public abstract void test();
+	public void test() {
+		class Bind implements Runnable {
+			public Component<RemoteType> subject;
+			public void run() {
+				subject.do_test();
+			}
+		}
+		
+		Bind br = new Bind();
+		br.subject = this;
+		
+		thread.dispatch(br);
+	}
+	
+	protected abstract void do_test();
 }
 
 class Unbinder extends Thread {

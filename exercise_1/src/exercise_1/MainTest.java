@@ -3,18 +3,7 @@ package exercise_1;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
-import common.Configuration;
-
-
-
-
-public class MainTest {
-
-	private static ArrayList<TotalOrderingTest> connectors = new ArrayList<TotalOrderingTest>();
-	
-	private static synchronized void add_connector(TotalOrderingTest connector) {
-		connectors.add(connector);
-	}
+public class MainTest extends common.Main<TotalOrderingTest> {	
 	
 	/**
 	 * The entry point for the program.
@@ -22,48 +11,40 @@ public class MainTest {
 	 * @param args The command line arguments passed to the program.
 	 */
 	public static void main(String[] args) {
+		new MainTest().run(args);
+	}
+	
+	private void run(String[] args) {
+		start_components(Integer.parseInt(args[0]));
 		
-		try {
-			ArrayList<Thread> threads = new ArrayList<Thread>();
-			
-			for (int i = 0; i < Integer.parseInt(args[0]); i++) {
-				Thread thread = new Thread(new Runnable() {
-					public void run() {
-						try {
-							TotalOrderingTest connector = new TotalOrderingTest();
-							MainTest.add_connector(connector);
-							connector.initialize(Configuration.readConfig());
-							connector.test();
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						}
-					}
-				});
-				threads.add(thread);
-				thread.start();
-			}
-
-			for (Thread thread : threads)
-				thread.join();
-			
-			for (TotalOrderingTest connector : connectors)
-				while (!connector.ready())
+		for (TotalOrderingTest component : components)
+			while (!component.ready())
+				try {
 					Thread.sleep(100);
-			
-			ArrayList<Integer> base = connectors.get(0).getMessages();
-			
-			System.out.println("ORDER: " + base.toString());
-			boolean valid = base.size() == connectors.size();
-			for (int j = 1; j < connectors.size(); j++) {
-				ArrayList<Integer> next = connectors.get(j).getMessages();
-				valid = valid && base.equals(next);
-				System.out.println("ORDER: " + next.toString());
-			}
-			
-			System.out.println("TOTAL ORDERING IS " + (valid ? "VALID" : "INVALID"));
-			System.exit(valid ? 0 : 1);
-		} catch (Exception e) {
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+		
+		ArrayList<Integer> base = components.get(0).getMessages();
+		
+		System.out.println("ORDER: " + base.toString());
+		boolean valid = base.size() == components.size();
+		for (int j = 1; j < components.size(); j++) {
+			ArrayList<Integer> next = components.get(j).getMessages();
+			valid = valid && base.equals(next);
+			System.out.println("ORDER: " + next.toString());
+		}
+		
+		System.out.println("TOTAL ORDERING IS " + (valid ? "VALID" : "INVALID"));
+		System.exit(valid ? 0 : 1);
+	}
+
+	protected TotalOrderingTest make_component() {
+		try {
+			return new TotalOrderingTest();
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 }

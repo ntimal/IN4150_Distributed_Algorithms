@@ -13,7 +13,7 @@ public class TotalOrderingTest extends TotalOrdering {
 		super();
 	}
 	
-	protected void deliver(int timestamp){
+	protected synchronized void deliver(int timestamp){
 		super.deliver(timestamp);
 		messages.add(timestamp);
 	}

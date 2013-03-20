@@ -1,7 +1,8 @@
-package exercise_1;
+package exercise_2;
+
 import java.rmi.RemoteException;
 
-public class Main extends common.Main<TotalOrdering> {	
+public class Main extends common.Main<Component> {
 	
 	/**
 	 * The entry point for the program.
@@ -13,9 +14,9 @@ public class Main extends common.Main<TotalOrdering> {
 		program.start_components(Integer.parseInt(args[0]));
 	}
 
-	protected TotalOrdering make_component() {
+	protected Component make_component() {
 		try {
-			return new TotalOrdering();
+			return new Component();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
