@@ -1,5 +1,11 @@
+package exercise_1;
+
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+
+import common.Configuration;
+
+
 
 
 public class MainTest {
@@ -26,7 +32,7 @@ public class MainTest {
 						try {
 							TotalOrderingTest connector = new TotalOrderingTest();
 							MainTest.add_connector(connector);
-							connector.initialize(Main.readConfig());
+							connector.initialize(Configuration.readConfig());
 							connector.test();
 						} catch (RemoteException e) {
 							e.printStackTrace();
@@ -46,12 +52,12 @@ public class MainTest {
 			
 			ArrayList<Integer> base = connectors.get(0).getMessages();
 			
-			System.out.println("BASE: " + base.toString());
+			System.out.println("ORDER: " + base.toString());
 			boolean valid = base.size() == connectors.size();
 			for (int j = 1; j < connectors.size(); j++) {
 				ArrayList<Integer> next = connectors.get(j).getMessages();
 				valid = valid && base.equals(next);
-				System.out.println("NEXT: " + next.toString());
+				System.out.println("ORDER: " + next.toString());
 			}
 			
 			System.out.println("TOTAL ORDERING IS " + (valid ? "VALID" : "INVALID"));

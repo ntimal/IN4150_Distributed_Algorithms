@@ -1,3 +1,5 @@
+package exercise_1;
+
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
@@ -16,6 +18,7 @@ public class TotalOrderingTest extends TotalOrdering {
 		messages.add(timestamp);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public synchronized ArrayList<Integer> getMessages() {
 		return (ArrayList<Integer>) messages.clone();
 	}
@@ -23,5 +26,4 @@ public class TotalOrderingTest extends TotalOrdering {
 	public synchronized boolean ready() {
 		return messages.size() == slots.size();
 	}
-
 }

@@ -1,8 +1,13 @@
-import java.io.*;
-import java.rmi.RemoteException;
+package common;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-public class Main {	
+public class Configuration {
 	/**
 	 * Read the configuration file.
 	 * 
@@ -32,25 +37,5 @@ public class Main {
 		}
 		
 		return slots;
-	}
-	
-	/**
-	 * The entry point for the program.
-	 * 
-	 * @param args The command line arguments passed to the program.
-	 */
-	public static void main(String[] args) {
-		for (int i = 0; i < Integer.parseInt(args[0]); i++)
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						Connector connector = new TotalOrdering();
-						connector.initialize(readConfig());
-						connector.test();
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
 	}
 }

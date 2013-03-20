@@ -1,8 +1,12 @@
+package common;
+
 import java.net.MalformedURLException;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Random;
+
+import exercise_1.ITotalOrdering;
 
 public abstract class Connector extends UnicastRemoteObject {
 	private static final long serialVersionUID = -6481677105759654371L;

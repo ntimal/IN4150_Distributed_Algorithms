@@ -1,7 +1,12 @@
+package exercise_1;
+
 import java.net.MalformedURLException;
 import java.rmi.*;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import common.Connector;
+import common.WorkerThread;
 
 public class TotalOrdering extends Connector implements ITotalOrdering {
 
