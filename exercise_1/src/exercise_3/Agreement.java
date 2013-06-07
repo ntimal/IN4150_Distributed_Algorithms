@@ -35,13 +35,12 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 		}
 		print(indent + "OM(" + f + ", " + v + ", " + Arrays.toString(L) + ")");
 		
-		if (faulty())
-			v = fault();
-		
 		if (f >= 0) {
 			int[] V = new int[L.length + 1];
+			if (faulty()) v = fault();
 			V[L.length] = v;
 			for (int i = 0; i < L.length; i++) {
+				if (faulty()) v = fault();
 				// BROAD CAST and gather: V[i] = OM(f - 1, v, set_remove(L, L[i]));
 				int p = L[i];
 				IAgreement remote = friends.get(p);
