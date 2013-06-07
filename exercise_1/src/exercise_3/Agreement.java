@@ -61,8 +61,8 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 				
 				// END BROADCAST
 			}
-			if (!faulty())
-				v = majority(V);
+
+			v = majority(V);
 		}
 		
 		print(indent + "Result: " + v);
@@ -70,12 +70,11 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 	}
 
 	private boolean faulty() {
-		return id == 1 || id == 4;
+		return id == 0 || id == 4;
 	}
 	
 	private int fault() throws RemoteException {
-		if (id == 1)
-			return 666 + rng.nextInt(1000);
+		if (id < 3) return rng.nextInt(2);
 		throw new RemoteException();
 	}
 	

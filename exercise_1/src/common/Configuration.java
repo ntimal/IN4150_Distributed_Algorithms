@@ -25,7 +25,7 @@ public class Configuration {
 			while ((strLine = br.readLine()) != null) {
 				String[] options = strLine.split(" ");
 				for (int i = 0; i < Integer.parseInt(options[0]); i++)
-					slots.add("rmi://" + options[1] + "/TotalOrdering/" + i);
+					slots.add("rmi://" + options[1] + "/DA/" + i);
 			}
 			
 			in.close();
