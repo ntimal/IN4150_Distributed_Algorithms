@@ -19,14 +19,17 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 		public int value = -1;
 		public Node[] children;
 		
-		public Node() {}
-		
 		public Node(int n) {
 			children = new Node[n];
 		}
-		
+
 		public int get_value() {
-			if (value != -1) return value;
+			return get_value("");
+		}
+		
+		public int get_value(String indent) {
+			if (value != -1)
+				return value;
 			
 			int l = 0;
 			for (int i = 0; i < children.length; i++)
@@ -34,9 +37,10 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 			
 			int a[] = new int[l];
 			for (int i = 0, j = 0; i < children.length; i++)
-				if (children[i] != null) a[j++] = children[i].get_value();
+				if (children[i] != null) a[j++] = children[i].get_value(indent + "    ");
 			
 			value = majority(a);
+			print(indent + Arrays.toString(a) + " -> " + value);
 			return value;
 		}
 	}
@@ -62,16 +66,6 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 		r[a.length] = v;
 		return r;
 	}
-
-	private int[][] transpose(int[][] A) {
-		int[][] R = new int[A[0].length][A.length];
-		for (int i = 0; i < A.length; i++) {
-			for (int j = 0; j < A[i].length; j++) {
-				R[j][i] = A[i][j];
-			}
-		}
-		return R;
-	}
 	
 	public void OM(int f, int v, int[] L, int[] C) throws RemoteException {
 		String indent = "";
@@ -83,20 +77,20 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 		Node current = root;
 		for (int i = 0; i < C.length; i++) {
 			
-			if (current.children[i] == null)
-				current.children[i] = new Node(friends.size() - 1);
+			int c = C[i];
+			if (current.children[c] == null)
+				current.children[c] = new Node(friends.size());
 			
-			current = current.children[i];
-			current.value = v;
+			current = current.children[c];
 		}
+		current.value = v;
 		
 		if (f < 0)
 			return;
 		
 		for (int i = 0; i < L.length; i++) {
-			//if (faulty()) v = fault();
+			if (faulty()) v = fault();
 			int p = L[i];
-			
 			
 			// BROAD CAST: OM(f - 1, v, set_remove(L, p), set_add(C, p));
 			IAgreement remote = friends.get(p);
@@ -122,19 +116,19 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 	}
 	
 	private int fault() throws RemoteException {
-		if (id < 3) return rng.nextInt(2);
+		if (id < 3) return 2000;
 		throw new RemoteException();
 	}
 	
 	protected void do_test() {
+		
+		root = new Node(friends.size());
 		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		
-		root = new Node(friends.size() - 1);
 		
 		if (id == 0) {
 			int[] L = new int[friends.size() - 1];
@@ -152,7 +146,7 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 		}
 		
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(5000 + id * 100);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
