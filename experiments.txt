@@ -1,0 +1,23 @@
+
+number of processors        = 8, 16, 32, 64, ...
+f                           = 2
+number of faulty processors = 2 (static, excl. com)
+? -> Number of messages
+
+
+number of processors        = 16
+f                           = 1, 2, 3, 4, 5
+number of faulty processors = 1, 2, 3, 4, 5 (static, excl. com)
+? -> Number of messages
+
+
+number of processors        = 8
+f                           = 2
+number of faulty processors = 3, 4, 5, ... (random, excl. com)
+? -> % algorithm fault
+
+
+number of processors        = 8
+f                           = 2
+number of faulty processors = 3, 4, 5, ... (random, incl. com)
+? -> % algorithm fault
