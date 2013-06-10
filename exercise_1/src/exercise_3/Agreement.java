@@ -11,8 +11,7 @@ import common.Component;
 public class Agreement extends Component<IAgreement> implements IAgreement {
 
 	private static final long serialVersionUID = 4885586288870737183L;
-	private static final int default_command = 1;
-	private static final int faults = 1;
+	private static final int faults = 2;
 	
 	public Agreement() throws RemoteException {}
 	
@@ -66,7 +65,7 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 						V[i] = remote.OM(f - 1, v, set_remove(L, p)); // << MESSAGE
 					} catch (MalformedURLException | NotBoundException | RemoteException e2) {
 						print(indent + "Could not connect to remote instance, assuming default.");
-						//V[i] = default_command;
+						V[i] = new int[L.length];
 					}
 				}
 				
