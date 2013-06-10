@@ -116,7 +116,7 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 	}
 	
 	private int fault() throws RemoteException {
-		if (id < 3) return 2000;
+		if (id < 3) return rng.nextInt(2);
 		throw new RemoteException();
 	}
 	
@@ -139,7 +139,7 @@ public class Agreement extends Component<IAgreement> implements IAgreement {
 			int[] C = {0};
 			
 			try {
-				OM(faults, 1337, L, C);
+				OM(faults, 1, L, C);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
