@@ -1,0 +1,10 @@
+﻿In this report we will experimentally evaluate the algorithm described by Lamport-Pease-Shostak for Byzantine Agreement. 
+The first experiment that we will conduct is determining how many messages are circulating in the distributed system with varying numbers of processes (8, 16, 24, 32 and 40 processes) and with a fixed amount of faulty processes (2 faulty processes). 
+The second experiment will also measure the amount of messages send in the distributed system. 
+However the aforementioned experiment will be conducted with a fixed number of processes (16 processes) and varying number of faulty processes (1, 2, 3, 4 and 5 faulty processes). 
+
+The third and the fourth experiment will focus more on the behavior of faulty processes. 
+While we assumed in the first two experiments that a faulty process would always give a faulty answer, the faulty processes in the third and fourth experiment will exhibit random behavior (faulty processes can also assume the “correct” value). 
+The third experiment will be executed with a fixed amount of processes (8 processes) and varying number of faulty processes (3, 4, 5 and 6 faulty processes). 
+The commander (the process initiating the OM function) will be excluded from being a faulty process (this was also the case for the first and the second experiment). 
+The fourth experiment includes the commander as a faulty process (when we have 3 faulty processes one of them is the commander). 
