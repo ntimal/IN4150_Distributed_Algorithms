@@ -1,0 +1,76 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+
+\title{Distributed Algorithms Lab Assignment 3: \\ Experimental results}
+\author{Roshan Timal \\ 4030087 \and Jasper Ruoff \\ 4003055}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+In this report we will experimentally evaluate the algorithm described by Lamport-Pease-Shostak for Byzantine Agreement.
+
+\section{Message complexity}
+The first experiment we have conducted studies how many messages $m$ are circulating in the distributed system with varying numbers of processes $p_n$ (8, 16, 24, 32, 40 and 48) and with a fixed amount of faulty processes $p_f = 2$. The results are shown in the table below.
+
+%$f=2$, $p_f=2$, static, excl com
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{r|r}
+		$p_n$ & $m$ \\ \hline
+		8 & 260 \\
+		16 & 2956 \\
+		24 & 11156 \\
+		32 & 27932 \\
+		40 & 56356 \\
+		48 & 99500
+	\end{tabular}
+\end{table}
+
+The number of messages $m$ grows polynomially with the number of processes $p_n$.
+
+The second experiment also measures the number of messages $m$ send in the distributed system. However it will be conducted with a fixed number of processes $p_n = 16$ and a varying number of faulty processes $p_f$ (1, 2, 3, 4 and 5). The results are shown in the table below.
+
+%$p_n=16$, static, excl com
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{r|r}
+		$f = p_f$ & $m$ \\ \hline
+		1 & 226 \\
+		2 & 2956 \\
+		3 & 35716 \\
+		4 & 396076
+	\end{tabular}
+\end{table}
+
+The number of messages $m$ grows exponentially with the number of faults $f$ to be detected.
+
+\section{System behavior}
+The next experiment will focus more on the behavior of faulty processes. 
+While we assumed in the first two experiments that a faulty process would always give a faulty answer, the faulty processes in the third experiment will exhibit random behavior, a faulty process propagates a wrong value with a 50\% chance. 
+The third experiment will be executed with a fixed amount of processes $p_n = 8$ and varying number of faulty processes $p_f$ (3, 4, 5 and 6). 
+The commander, the process initiating the OM function, will be excluded from being a faulty process, as was also the case for the first and the second experiment.
+
+Because the experiment introduces a random behavior, we have repeated each experiment 10 times, and calculated the average. The table below shows the percentage of processes that got a wrong order.
+
+%$p_n=8$, $f=2$, random, excl com, 10 rounds
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{r|r}
+		$p_f$ & Wrong order (\%) \\ \hline
+		3 & 7.5 \\
+		4 & 11 \\
+		5 & 44 \\
+		6 & 54
+	\end{tabular}
+\end{table}
+
+It is clearly visible that as the number of faulty processes $p_f$ increases, more processes get a wrong order.
+
+When the commander is a traitor, it is very rare for the processes to reach agreement if the number of faulty processes exceeds the maximum. Furthermore, in that case, it follows naturally that 50\% of the processes gets a wrong order on average, when we assume the random fault behavior as described above.
+
+\end{document}
